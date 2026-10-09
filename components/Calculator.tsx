@@ -10,17 +10,18 @@ export default function Calculator() {
   const [bill, setBill] = useState(8000);
   const [offset, setOffset] = useState(0.5);
   const [rate, setRate] = useState("");
-  const [lead, setLead] = useState({ name: "", phone: "", email: "", municipality: "" });
-  const [sent, setSent] = useState<"" | "ok" | "err">("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [sent, setSent] = useState(false);
   const rateNum = rate ? parseFloat(rate) : NaN;
   const rateValid = rate === "" || (rateNum >= 1 && rateNum <= 50);
   const usingAvg = rate === "" || !rateValid;
   const res = useMemo(() => calculateSolar({ monthlyBill: bill, targetOffset: offset, tariffPerKwh: usingAvg ? undefined : rateNum }), [bill, offset, usingAvg, rateNum]);
   const next = () => setStep((s) => s + 1), back = () => setStep((s) => Math.max(0, s - 1));
-  async function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent) {
     e.preventDefault();
-    const r = await fetch("/api/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...lead, tariffPerKwh: res.assumptions.tariffPerKwh, usedNationalAverage: usingAvg, monthlyBill: bill, targetOffset: offset, calculatorResult: res }) });
-    setSent(r.ok ? "ok" : "err");
+    window.location.href = `mailto:rapidon123@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setSent(true);
   }
   const field = "min-h-12 w-full rounded border border-slate-300 px-4 text-lg";
   return (
@@ -67,14 +68,11 @@ export default function Calculator() {
           <p className="mt-4 text-xs text-slate-500">These figures are estimates for planning purposes only. Actual system size, savings, equipment, installation cost, and performance depend on your electricity consumption, location, roof conditions, solar resource, equipment selection, and site assessment. Assumptions used: ₱{formatNumber(res.assumptions.tariffPerKwh, 2)}/kWh{usingAvg ? " (national average)" : " (your rate)"}, {res.assumptions.peakSunHours} peak sun hours/day, {formatPercentage(res.assumptions.performanceRatio)} performance ratio.</p>
           <form onSubmit={submit} className="mt-8 rounded bg-deep p-5 text-white">
             <h3 className="font-display text-xl font-bold">Want a more accurate estimate for your home?</h3>
-            <p className="mb-3 text-sm text-white/80">This is only an initial estimate. Request a free solar assessment.</p>
-            {sent === "ok" ? <p className="font-semibold text-sun">Thank you! We&apos;ll be in touch.</p> : <div className="space-y-3 text-deep">
-              <input required aria-label="Name" placeholder="Name" className={field} value={lead.name} onChange={(e) => setLead({ ...lead, name: e.target.value })} />
-              <input required aria-label="Mobile number" inputMode="tel" placeholder="Mobile number" className={field} value={lead.phone} onChange={(e) => setLead({ ...lead, phone: e.target.value })} />
-              <input aria-label="City / Municipality" placeholder="City / Municipality" className={field} value={lead.municipality} onChange={(e) => setLead({ ...lead, municipality: e.target.value })} />
-              <input aria-label="Email" type="email" placeholder="Email (optional)" className={field} value={lead.email} onChange={(e) => setLead({ ...lead, email: e.target.value })} />
-              <button className={`${btn} w-full`}>Request a Free Solar Assessment</button>
-              {sent === "err" && <p className="text-sm text-red-200">Something went wrong. Please call or message us instead.</p>}
+            <p className="mb-3 text-sm text-white/80">This is only an initial estimate. Send us a message for a free solar assessment.</p>
+            {sent ? <p className="font-semibold text-sun">Thank you! Your email is ready to send.</p> : <div className="space-y-3 text-deep">
+              <input required aria-label="Subject" placeholder="Subject" className={`${field} text-white placeholder:text-white/60`} value={subject} onChange={(e) => setSubject(e.target.value)} />
+              <textarea required aria-label="Body" placeholder="Body" rows={5} className={`${field} py-3 text-white placeholder:text-white/60`} value={body} onChange={(e) => setBody(e.target.value)} />
+              <button className={`${btn} w-full`}>Send Email</button>
             </div>}
           </form>
           <button className="mt-4 min-h-12 font-semibold" onClick={() => setStep(0)}>← Start over</button>

@@ -5,7 +5,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-30 bg-deep text-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-        <Link href="/" className="font-display text-lg font-bold">☀️ {b.name}</Link>
+        <Link href="/" className="font-display text-lg font-bold">{b.name}</Link>
         <nav aria-label="Main" className="hidden items-center gap-5 text-sm lg:flex">
           {links.map(([h, l]) => <Link key={h} href={h} className="hover:text-sun">{l}</Link>)}
           <Link href="/solar-calculator" className="rounded bg-sun px-4 py-2 font-semibold text-deep hover:bg-sun-dark">Calculate Savings</Link>
